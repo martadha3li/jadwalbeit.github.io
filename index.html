@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>جدول البيت</title>
+<style>
+body{font-family:Tahoma;background:#f2f4f8;margin:0;padding:20px;}
+h1{text-align:center;color:#1e88e5;margin-bottom:20px;}
+.card{background:white;padding:15px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-bottom:20px;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;}
+th{background:#e3f2fd;}
+button{padding:8px 15px;border:none;border-radius:6px;background:#1e88e5;color:white;cursor:pointer;margin:5px 0;}
+button:hover{background:#1565c0;}
+.adminPanel{display:none;background:#fff3cd;padding:15px;border-radius:8px;margin-bottom:20px;}
+input,select,textarea{width:100%;padding:6px;margin:5px 0;}
+</style>
+</head>
+<body>
+
+<h1>📅 جدول البيت</h1>
+
+<div class="card">
+<button onclick="setWeek(1)">الأسبوع الأول</button>
+<button onclick="setWeek(2)">الأسبوع الثاني</button>
+<button onclick="showAdmin()">🔐 دخول الإدارة</button>
+</div>
+
+<div class="card">
+<h3>🍽 جدول غسيل المواعين</h3>
+<div id="dishesTable"></div>
+</div>
+
+<div class="card">
+<h3>🚽 جدول تنظيف الحمامات</h3>
+<div id="bathTable"></div>
+</div>
+
+<div class="adminPanel" id="adminPanel">
+<h3>لوحة التحكم</h3>
+
+<label>إضافة شخص جديد:</label>
+<input id="newPerson" placeholder="اسم الشخص">
+<button onclick="addPerson()">➕ إضافة</button>
+
+<label>استثناء شخص مؤقت:</label>
+<select id="excludePerson"></select>
+<button onclick="toggleExclude()">⚡ تفعيل/إلغاء</button>
+
+<label>تغيير الرقم السري الإداري:</label>
+<input id="newPass" placeholder="الرقم الجديد">
+<button onclick="saveSettings()">💾 حفظ الإعدادات</button>
+</div>
+
+<script>
+let adminPassword = localStorage.getItem("pass") || "112233";
+let currentWeek = 1;
+
+// قائمة الأشخاص
+let persons = ["الزيد","المحيسن","السياحي","الموسى","أكرم","الشيخ","الغافلي"];
+let excluded = [];
+
+function setWeek(w){currentWeek=w;generateTables();}
+
+function generateTables(){
+let dishesWeek1 = [
+["الأحد","الزيد"],
+["الاثنين","السياحي"],
+["الثلاثاء","أكرم"],
+["الأربعاء","الغافلي"]
+];
+
+let dishesWeek2 = [
+["الأحد","الزيد"],
+["الاثنين","المحيسن"],
+["الثلاثاء","الشيخ"],
+["الأربعاء","الموسى"]
+];
+
+let bathWeek1 = [
+["حمام 1","الناصر"],
+["حمام 2","بوامير"],
+["حمام 3","أكرم"]
+];
+
+let bathWeek2 = [
+["حمام 1","حسن"],
+["حمام 2","المحيسن"],
+["حمام 3","الموسى"]
+];
+
+// تطبيق الاستثناءات
+function applyExclusion(arr){
+return arr.map(([day,person])=>[day,excluded.includes(person)?"—":person]);
+}
+
+let dishes = currentWeek==1 ? dishesWeek1 : dishesWeek2;
+let baths = currentWeek==1 ? bathWeek1 : bathWeek2;
+
+dishes = applyExclusion(dishes);
+baths = applyExclusion(baths);
+
+let dHTML = "<table><tr><th>اليوم</th><th>المسؤول</th></tr>";
+dishes.forEach(row=>{dHTML += `<tr><td>${row[0]}</td><td>${row[1]}</td></tr>`;});
+dHTML += "</table>";
+
+let bHTML = "<table><tr><th>الموقع</th><th>المسؤول</th></tr>";
+baths.forEach(row=>{bHTML += `<tr><td>${row[0]}</td><td>${row[1]}</td></tr>`;});
+bHTML += "</table>";
+
+document.getElementById("dishesTable").innerHTML=dHTML;
+document.getElementById("bathTable").innerHTML=bHTML;
+
+// تحديث قائمة الاستثناءات
+let select = document.getElementById("excludePerson");
+select.innerHTML = "";
+persons.forEach(p=>{let opt = document.createElement("option"); opt.value=p; opt.text=p; select.appendChild(opt);});
+}
+
+function showAdmin(){
+let pass = prompt("أدخل الرقم السري");
+if(pass===adminPassword){
+document.getElementById("adminPanel").style.display="block";
+alert("تم الدخول");
+}else{alert("الرقم السري خاطئ");}
+}
+
+function saveSettings(){
+let newPass = document.getElementById("newPass").value;
+if(newPass){adminPassword = newPass; localStorage.setItem("pass",newPass);}
+alert("تم حفظ الإعدادات");
+}
+
+function addPerson(){
+let name = document.getElementById("newPerson").value.trim();
+if(name && !persons.includes(name)){persons.push(name);generateTables();document.getElementById("newPerson").value="";}
+}
+
+function toggleExclude(){
+let name = document.getElementById("excludePerson").value;
+if(excluded.includes(name)){excluded = excluded.filter(p=>p!==name);}else{excluded.push(name);}
+generateTables();
+}
+
+// إشعار عند فتح الصفحة للمهام اليوم
+window.onload=function(){
+generateTables();
+let today = new Date().getDay(); // الأحد=0 ... الأربعاء=3
+let dayMap = ["الأحد","الاثنين","الثلاثاء","الأربعاء"];
+if(today>=0 && today<=3){
+alert("📌 اليوم "+dayMap[today]+" مسؤولياتكم موجودة في الجدول");
+}
+}
+</script>
+
+</body>
+</html>
