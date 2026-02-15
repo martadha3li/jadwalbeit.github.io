@@ -19,7 +19,7 @@ const messaging = getMessaging(app);
 let currentUser = null;
 let adminUsers = ["admin"];
 
-// Splash
+// Splash Screen
 window.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     document.getElementById("splashScreen").style.display="none";
@@ -27,7 +27,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 500);
 });
 
-// Request permission for Push
+// Push notifications
 async function requestPermission() {
   try {
     const permission = await Notification.requestPermission();
@@ -38,7 +38,6 @@ async function requestPermission() {
   } catch(e){console.error(e);}
 }
 
-// Listen Push
 onMessage(messaging,(payload)=>{
   const bar = document.getElementById("warningBar");
   bar.innerText = `🔔 ${payload.notification.title}: ${payload.notification.body}`;
@@ -46,9 +45,9 @@ onMessage(messaging,(payload)=>{
   setTimeout(()=>bar.classList.remove("show-warning"),7000);
 });
 
-// ========================
-// Login Function
-// ========================
+// ============================
+// Login
+// ============================
 async function login(){
   const name=document.getElementById("loginName").value.trim();
   const pass=document.getElementById("loginPass").value.trim();
@@ -74,9 +73,9 @@ async function login(){
   } else { document.getElementById("loginError").innerText="المستخدم غير موجود"; }
 }
 
-// ========================
-// Register Function
-// ========================
+// ============================
+// Register
+// ============================
 async function register(){
   const name=document.getElementById("newName").value.trim();
   const pass=document.getElementById("newPass").value.trim();
@@ -93,18 +92,17 @@ async function register(){
   document.getElementById("newPass").value="";
 }
 
-// ========================
-// Expose to HTML
-// ========================
-window.login = login;
-window.register = register;
-// أضف أي دوال تحتاجها للأزرار الأخرى
-window.payNow = payNow;
-window.addUser = addUser;
-window.regenerate = regenerate;
-window.toggleCooking = toggleCooking;
-window.viewStats = viewStats;
-window.updateFee = updateFee;
+// ============================
+// Event Listeners
+// ============================
+document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("registerBtn").addEventListener("click", register);
+document.getElementById("payNowBtn").addEventListener("click", payNow);
+document.getElementById("addUserBtn").addEventListener("click", addUser);
+document.getElementById("regenerateBtn").addEventListener("click", regenerate);
+document.getElementById("toggleCookingBtn").addEventListener("click", toggleCooking);
+document.getElementById("updateFeeBtn").addEventListener("click", updateFee);
+document.getElementById("viewStatsBtn").addEventListener("click", viewStats);
 
 // ===================================
 // باقي الدوال: renderUsers, loadSchedules, renderFees, etc.
