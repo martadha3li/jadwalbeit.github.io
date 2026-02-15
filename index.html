@@ -11,6 +11,7 @@
 </head>
 <body>
 
+<!-- Splash Screen -->
 <div id="splashScreen" class="splash">
   <h1>جدول البيت</h1>
 </div>
@@ -19,46 +20,58 @@
 
 <div class="container">
 
+<!-- Login Page -->
 <div id="loginPage" class="card" style="display:none">
-<h2>🔐 دخول نظام جدول البيت</h2>
-<input type="text" id="loginName" placeholder="اسم العضو">
-<input type="password" id="loginPass" placeholder="الرقم السري">
-<button onclick="login()">دخول</button>
-<p id="loginError" style="color:#f87171;"></p>
+  <h2>🔐 دخول نظام جدول البيت</h2>
+  <input type="text" id="loginName" placeholder="اسم العضو">
+  <input type="password" id="loginPass" placeholder="الرقم السري">
+  <button onclick="login()">دخول</button>
+  <p id="loginError" style="color:#f87171;"></p>
+
+  <hr>
+  <h3>أو تسجيل عضوية جديدة</h3>
+  <input type="text" id="newName" placeholder="اسم العضو الجديد">
+  <input type="password" id="newPass" placeholder="الرقم السري">
+  <button onclick="register()">تسجيل عضوية</button>
+  <p id="registerError" style="color:#f87171;"></p>
 </div>
 
+<!-- Main App -->
 <div id="app" style="display:none">
 
-<div class="card">
-<h2>📊 الجداول</h2>
-<p id="washing"></p>
-<p id="cleaning"></p>
-<p id="cooking"></p>
-<p id="tamween"></p>
-</div>
+  <!-- Tables -->
+  <div class="card">
+    <h2>📊 الجداول</h2>
+    <p id="washing"></p>
+    <p id="cleaning"></p>
+    <p id="cooking"></p>
+    <p id="tamween"></p>
+  </div>
 
-<div class="card">
-<h2>👥 الأعضاء</h2>
-<div id="usersIcons" class="icons"></div>
-</div>
+  <!-- Users Icons -->
+  <div class="card">
+    <h2>👥 الأعضاء</h2>
+    <div id="usersIcons" class="icons"></div>
+  </div>
 
-<div class="card">
-<h2>💰 الرسوم الشهرية</h2>
-<p id="dueAmount"></p>
-<button onclick="payNow()">تم الدفع</button>
-</div>
+  <!-- Fees -->
+  <div class="card">
+    <h2>💰 الرسوم الشهرية</h2>
+    <p id="dueAmount"></p>
+    <button onclick="payNow()">تم الدفع</button>
+  </div>
 
-<div id="adminPanel" class="card admin-panel" style="display:none">
-<h2>⚙ لوحة الإدارة</h2>
-<button onclick="addUser()">إضافة عضو</button>
-<button onclick="regenerate()">إعادة توزيع الجداول</button>
-<button onclick="toggleCooking()">إظهار/إخفاء الطبخ</button>
-<input type="number" id="feeInput" placeholder="تعديل مبلغ الرسوم">
-<button onclick="updateFee()">تحديث الرسوم</button>
-<button onclick="viewStats()">📊 الإحصائيات</button>
-</div>
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="card admin-panel" style="display:none">
+    <h2>⚙ لوحة الإدارة</h2>
+    <button onclick="addUser()">إضافة عضو</button>
+    <button onclick="regenerate()">إعادة توزيع الجداول</button>
+    <button onclick="toggleCooking()">إظهار/إخفاء الطبخ</button>
+    <input type="number" id="feeInput" placeholder="تعديل مبلغ الرسوم">
+    <button onclick="updateFee()">تحديث الرسوم</button>
+    <button onclick="viewStats()">📊 الإحصائيات</button>
+  </div>
 
-</div>
 </div>
 
 <script type="module" src="app.js"></script>
