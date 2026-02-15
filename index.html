@@ -8,6 +8,25 @@
 <meta name="theme-color" content="#1e293b">
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* بسيط للModal والشاشات الصغيرة */
+.modal {
+  display: none; position: fixed; z-index: 1000;
+  left: 0; top: 0; width: 100%; height: 100%;
+  overflow: auto; background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+  background-color: #fff; margin: 10% auto;
+  padding: 20px; border-radius: 10px;
+  width: 90%; max-width: 400px;
+}
+.close { float: right; font-size: 24px; cursor: pointer; }
+@media(max-width: 500px){
+  .card { margin:10px; padding:10px; }
+  .modal-content { width: 95%; margin-top:20%; }
+}
+button { cursor:pointer; }
+</style>
 </head>
 <body>
 
@@ -30,14 +49,25 @@
 
   <hr>
   <h3>أو تسجيل عضوية جديدة</h3>
-  <input type="text" id="newName" placeholder="اسم العضو الجديد">
-  <input type="password" id="newPass" placeholder="الرقم السري">
-  <button id="registerBtn">تسجيل عضوية</button>
-  <p id="registerError" style="color:#f87171;"></p>
+  <button id="openRegisterModalBtn">تسجيل عضوية جديدة</button>
+</div>
+
+<!-- Modal لتسجيل عضوية جديدة -->
+<div id="registerModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeModal">&times;</span>
+    <h3>تسجيل عضوية جديدة</h3>
+    <input type="text" id="newName" placeholder="اسم العضو الجديد">
+    <input type="password" id="newPass" placeholder="الرقم السري">
+    <button id="registerBtn">تسجيل</button>
+    <p id="registerError" style="color:#f87171;"></p>
+  </div>
 </div>
 
 <!-- Main App -->
 <div id="app" style="display:none">
+
+  <button id="logoutBtn" style="float:left; margin-bottom:10px;">تسجيل خروج</button>
 
   <!-- Tables -->
   <div class="card">
@@ -64,11 +94,12 @@
   <!-- Admin Panel -->
   <div id="adminPanel" class="card admin-panel" style="display:none">
     <h2>⚙ لوحة الإدارة</h2>
-    <button id="addUserBtn">إضافة عضو</button>
-    <button id="regenerateBtn">إعادة توزيع الجداول</button>
-    <button id="toggleCookingBtn">إظهار/إخفاء الطبخ</button>
     <input type="number" id="feeInput" placeholder="تعديل مبلغ الرسوم">
     <button id="updateFeeBtn">تحديث الرسوم</button>
+    <hr>
+    <button id="addUserBtn">إضافة عضو جديد</button>
+    <button id="regenerateBtn">إعادة توزيع الجداول</button>
+    <button id="toggleCookingBtn">إظهار/إخفاء جدول الطبخ</button>
     <button id="viewStatsBtn">📊 الإحصائيات</button>
   </div>
 
