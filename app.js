@@ -21,16 +21,9 @@ let showCooking=true;
 let members=[], washingMembers=[], cleaningMembers=[], cookingMembers=[], tamweenMembers=[];
 let currentView="week";
 
-// Splash
-window.addEventListener("DOMContentLoaded", async ()=>{
-  setTimeout(()=>{
-    document.getElementById("splashScreen").style.display="none";
-    document.getElementById("loginPage").style.display="block";
-  },500);
-  await fetchMembers();
-});
-
-// Fetch members
+// ----------------------------
+// جلب الأعضاء من Firebase
+// ----------------------------
 async function fetchMembers(){
   const snapshot = await getDocs(collection(db,"users"));
   members=[]; washingMembers=[]; cleaningMembers=[]; cookingMembers=[]; tamweenMembers=[];
@@ -45,7 +38,7 @@ async function fetchMembers(){
 }
 
 // ----------------------------
-// Login / Register / Logout
+// تسجيل الدخول / تسجيل عضوية
 // ----------------------------
 async function login(){
   const name=document.getElementById("loginName").value.trim();
@@ -61,7 +54,7 @@ async function login(){
       document.getElementById("loginPage").style.display="none";
       document.getElementById("app").style.display="block";
       if(adminUsers.includes(name)) document.getElementById("adminPanel").style.display="block";
-      loadSchedules(); renderUsers(); renderFees(); renderAdminMembers();
+      loadSchedules(); renderUsers(); renderFees(); renderAdminMembers(); checkNotifications();
     } else { errorEl.innerText="كلمة المرور خاطئة"; }
   } else { errorEl.innerText="المستخدم غير موجود"; }
 }
@@ -81,18 +74,29 @@ async function register(){
 function logout(){ currentUser=null; document.getElementById("app").style.display="none"; document.getElementById("loginPage").style.display="block"; }
 
 // ----------------------------
-// Schedules
+// الجداول
 // ----------------------------
 function loadSchedules(){
   const today = new Date().getDay();
   function filterByToday(arr){ return currentView==="week"?arr:[arr[today%arr.length]]; }
-  document.getElementById("washing").innerHTML=filterByToday(washingMembers).map(m=>`🔹 ${m}`).join("<br>");
-  document.getElementById("cleaning").innerHTML=filterByToday(cleaningMembers).map(m=>`🧹 ${m}`).join("<br>");
+  document.getElementById("washing").innerHTML=filterByToday(washingMembers).map(m=>`🔹 ${m} <button onclick="markDone('${m}','washing')">تم الإنجاز</button>`).join("<br>");
+  document.getElementById("cleaning").innerHTML=filterByToday(cleaningMembers).map(m=>`🧹 ${m} <button onclick="markDone('${m}','cleaning')">تم الإنجاز</button>`).join("<br>");
   document.getElementById("cooking").innerHTML=showCooking?filterByToday(cookingMembers).map(m=>`🍳 ${m}`).join("<br>"):"تم إخفاء جدول الطبخ";
   document.getElementById("tamween").innerHTML=filterByToday(tamweenMembers).map(m=>`📦 ${m}`).join("<br>");
 }
 
-// Users icons
+// ----------------------------
+// تأكيد إنجاز مهمة
+// ----------------------------
+async function markDone(member,task){
+  if(member!==currentUser.id){ alert("غير مسموح"); return; }
+  await setDoc(doc(db,"tasks",`${member}-${task}-${new Date().toDateString()}`),{done:true,date:Date.now()});
+  alert("تم تسجيل الإنجاز!");
+}
+
+// ----------------------------
+// أيقونات الأعضاء
+// ----------------------------
 function renderUsers(){
   const container=document.getElementById("usersIcons"); container.innerHTML="";
   members.forEach(name=>{
@@ -100,8 +104,11 @@ function renderUsers(){
   });
 }
 
-// Admin members with toggle
+// ----------------------------
+// لوحة الإدارة
+// ----------------------------
 async function renderAdminMembers(){
+  if(!currentUser||!adminUsers.includes(currentUser.id)) return;
   const container = document.getElementById("adminMembers"); container.innerHTML="";
   members.forEach(async name=>{
     const userDoc=await getDoc(doc(db,"users",name));
@@ -109,7 +116,7 @@ async function renderAdminMembers(){
     const div=document.createElement("div");
     div.style.margin="5px 0";
     div.innerHTML = `${name} - <span style="color:${data.active?'green':'red'}">${data.active?'مفعّل':'معطّل'}</span>
-      <button style="margin-left:10px;" onclick="toggleUser('${name}')">${data.active?'تعطيل':'تفعيل'}</button>`;
+      <button onclick="toggleUser('${name}')">${data.active?'تعطيل':'تفعيل'}</button>`;
     container.appendChild(div);
   });
 }
@@ -124,18 +131,8 @@ async function toggleUser(name){
   }
 }
 
-// Admin buttons state
-function updateAdminBtnState(btnId,active){
-  const btn=document.getElementById(btnId);
-  if(active){ btn.classList.add("active"); btn.classList.remove("inactive"); }
-  else{ btn.classList.add("inactive"); btn.classList.remove("active"); }
-}
-
-// Toggle cooking
-function toggleCooking(){ showCooking=!showCooking; updateAdminBtnState("toggleCookingBtn",showCooking); loadSchedules(); }
-
 // ----------------------------
-// Fees
+// الرسوم الشهرية
 // ----------------------------
 async function renderFees(){
   const snapshot=await getDocs(collection(db,"fees"));
@@ -151,7 +148,7 @@ async function payNow(){
 }
 
 // ----------------------------
-// Chat
+// دردشة
 // ----------------------------
 const chatRef = collection(db,"chat");
 async function sendChat(){
@@ -171,14 +168,12 @@ async function loadChat(){
 setInterval(loadChat,5000);
 
 // ----------------------------
-// Event Listeners
+// الأحداث
 // ----------------------------
 document.getElementById("loginBtn").addEventListener("click",login);
 document.getElementById("registerBtn").addEventListener("click",register);
 document.getElementById("logoutBtn").addEventListener("click",logout);
 document.getElementById("payNowBtn").addEventListener("click",payNow);
-document.getElementById("toggleCookingBtn").addEventListener("click",toggleCooking);
-document.getElementById("regenerateBtn").addEventListener("click",()=>{ loadSchedules(); updateAdminBtnState("regenerateBtn",true); });
 document.getElementById("showWeekBtn").addEventListener("click",()=>{ currentView="week"; loadSchedules(); });
 document.getElementById("showTodayBtn").addEventListener("click",()=>{ currentView="today"; loadSchedules(); });
 document.getElementById("sendChatBtn").addEventListener("click",sendChat);
@@ -189,9 +184,8 @@ document.getElementById("openRegisterModalBtn").addEventListener("click",()=>{mo
 document.getElementById("closeModal").addEventListener("click",()=>{modal.style.display="none";});
 window.addEventListener("click",(e)=>{if(e.target==modal) modal.style.display="none";});
 
-// Export to window
+// Export
 window.login=login; window.register=register; window.logout=logout;
 window.loadSchedules=loadSchedules; window.renderUsers=renderUsers;
 window.renderFees=renderFees; window.payNow=payNow;
 window.renderAdminMembers=renderAdminMembers; window.toggleUser=toggleUser;
-window.toggleCooking=toggleCooking; window.updateAdminBtnState=updateAdminBtnState;
