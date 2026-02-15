@@ -2,165 +2,198 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>جدول البيت</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
-body{font-family:Tahomaa;background:#f2f4f8;padding:20px}
-h1{text-align:center;color:#1e88e5}
-.card{background:white;padding:15px;border-radius:10px;margin-bottom:20px;box-shadow:0 4px 10px rgba(0,0,0,0.1)}
-button{padding:6px 12px;border:none;border-radius:6px;background:#1e88e5;color:white;cursor:pointer}
-button:hover{background:#1565c0}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ddd;padding:8px;text-align:center}
-th{background:#e3f2fd}
-input,select{width:100%;padding:6px;margin:4px 0}
-.admin{display:none;background:#fff3cd;padding:15px;border-radius:8px}
+* { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+
+body {
+  margin:0;
+  background: linear-gradient(135deg,#1e293b,#0f172a);
+  color:white;
+}
+
+.container {
+  padding:20px;
+  max-width:1000px;
+  margin:auto;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  transition:0.3s;
+}
+
+.card:hover {
+  transform:translateY(-5px);
+}
+
+h2 { margin-top:0 }
+
+button {
+  background:#3b82f6;
+  border:none;
+  padding:10px 15px;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+button:hover {
+  background:#2563eb;
+}
+
+input {
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  margin-top:10px;
+  width:100%;
+}
+
+.warning {
+  position:fixed;
+  top:-100px;
+  right:0;
+  left:0;
+  background:#ef4444;
+  text-align:center;
+  padding:15px;
+  font-weight:bold;
+  transition:0.5s;
+}
+
+.show-warning {
+  top:0;
+}
+
+.admin-panel {
+  border:2px dashed #facc15;
+}
 </style>
 </head>
+
 <body>
 
-<h1>📅 جدول البيت</h1>
+<div id="warningBar" class="warning"></div>
+
+<div class="container">
+
+<!-- صفحة الدخول -->
+<div id="loginPage" class="card">
+<h2>🔐 دخول نظام جدول البيت</h2>
+<input type="password" id="passInput" placeholder="ادخل الرقم السري">
+<button onclick="login()">دخول</button>
+<p id="loginError" style="color:#f87171;"></p>
+</div>
+
+<!-- التطبيق -->
+<div id="app" style="display:none">
 
 <div class="card">
-<button onclick="chooseWeek(1)">الأسبوع الأول</button>
-<button onclick="chooseWeek(2)">الأسبوع الثاني</button>
-<button onclick="adminLogin()">🔐 دخول الإدارة</button>
+<h2>📊 الجداول</h2>
+<p id="washing"></p>
+<p id="cleaning"></p>
+<p id="cooking"></p>
+<p id="tamween"></p>
 </div>
 
 <div class="card">
-<h3>📋 الجدول</h3>
-<div id="schedule"></div>
+<h2>💰 الرسوم الشهرية</h2>
+<p id="dueAmount"></p>
+<button onclick="payNow()">تم الدفع</button>
 </div>
 
-<div class="admin" id="adminPanel">
-<h3>لوحة التحكم</h3>
-
-<label>إضافة شخص</label>
-<input id="newName">
-<button onclick="addPerson()">➕ إضافة</button>
-
-<label>حذف شخص</label>
-<select id="deleteSelect"></select>
-<button onclick="deletePerson()">❌ حذف</button>
-
-<label>أيام التواجد</label>
-<select id="daySelect">
-<option>الأحد</option>
-<option>الاثنين</option>
-<option>الثلاثاء</option>
-<option>الأربعاء</option>
-</select>
-<select id="personSelect"></select>
-<button onclick="setAvailability()">💾 حفظ الأيام</button>
-
-<label>غياب شهر هجري</label>
-<select id="monthSelect">
-<option>محرم</option><option>صفر</option><option>ربيع الأول</option>
-<option>ربيع الآخر</option><option>جمادى الأولى</option>
-<option>جمادى الآخرة</option><option>رجب</option>
-<option>شعبان</option><option>رمضان</option>
-<option>شوال</option><option>ذو القعدة</option>
-<option>ذو الحجة</option>
-</select>
-<button onclick="setMonthAbsence()">🚫 تفعيل غياب الشهر</button>
-
+<div id="adminPanel" class="card admin-panel" style="display:none">
+<h2>⚙ لوحة الإدارة</h2>
+<button onclick="regenerate()">إعادة توزيع</button>
+<button onclick="toggleCooking()">إظهار/إخفاء الطبخ</button>
+<input type="number" id="feeInput" placeholder="تعديل مبلغ الرسوم">
+<button onclick="updateFee()">تحديث الرسوم</button>
 </div>
 
-<script type="module">
+</div>
+</div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script>
+const ADMIN_PASS="112233";
+const MEMBER_PASS="0000";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBqBXmf2ui2_39MzoK5HLD6nRWYGO28oso",
-  authDomain: "jadwal-beit.firebaseapp.com",
-  projectId: "jadwal-beit",
-  storageBucket: "jadwal-beit.firebasestorage.app",
-  messagingSenderId: "324621350402",
-  appId: "1:324621350402:web:a17291d57d14a363f9d91b"
-};
+let monthlyFee=300;
+let showCooking=true;
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let currentWeek=1;
-let rotationIndex=0;
-
-function chooseWeek(w){currentWeek=w}
-
-window.adminLogin=function(){
-let p=prompt("ادخل الرقم السري");
-if(p==="112233"){
-document.getElementById("adminPanel").style.display="block";
-}
+function login(){
+ const pass=document.getElementById("passInput").value;
+ if(pass===ADMIN_PASS){
+   localStorage.setItem("role","admin");
+   startApp();
+ }
+ else if(pass===MEMBER_PASS){
+   localStorage.setItem("role","member");
+   startApp();
+ }
+ else{
+   document.getElementById("loginError").innerText="الرقم غير صحيح";
+ }
 }
 
-window.addPerson=async function(){
-let name=document.getElementById("newName").value.trim();
-if(!name)return;
-await setDoc(doc(db,"persons",name),{
-days:["الأحد","الاثنين","الثلاثاء","الأربعاء"],
-absentMonths:[]
-});
-document.getElementById("newName").value="";
+function startApp(){
+ document.getElementById("loginPage").style.display="none";
+ document.getElementById("app").style.display="block";
+
+ if(localStorage.getItem("role")==="admin"){
+   document.getElementById("adminPanel").style.display="block";
+ }
+
+ generateTables();
+ checkLate();
 }
 
-window.deletePerson=async function(){
-let name=document.getElementById("deleteSelect").value;
-await deleteDoc(doc(db,"persons",name));
+function generateTables(){
+ document.getElementById("washing").innerText="🧺 الغسيل: الزيد";
+ document.getElementById("cleaning").innerText="🧹 النظافة: الغافلي";
+ document.getElementById("cooking").innerText= showCooking ? "🍳 الطبخ: المهدي" : "";
+ document.getElementById("tamween").innerText="🛒 التموين: الشيخ";
 }
 
-window.setAvailability=async function(){
-let name=document.getElementById("personSelect").value;
-let day=document.getElementById("daySelect").value;
-await setDoc(doc(db,"persons",name),{
-days:[day]
-},{merge:true});
+function regenerate(){
+ generateTables();
+ alert("تم إعادة التوزيع بنجاح");
 }
 
-window.setMonthAbsence=async function(){
-let name=document.getElementById("personSelect").value;
-let month=document.getElementById("monthSelect").value;
-await setDoc(doc(db,"persons",name),{
-absentMonths:[month]
-},{merge:true});
+function toggleCooking(){
+ showCooking=!showCooking;
+ generateTables();
 }
 
-onSnapshot(collection(db,"persons"),(snapshot)=>{
-let persons=[];
-snapshot.forEach(doc=>persons.push({id:doc.id,...doc.data()}));
-generateSchedule(persons);
-updateSelects(persons);
-});
-
-function updateSelects(persons){
-let del=document.getElementById("deleteSelect");
-let sel=document.getElementById("personSelect");
-del.innerHTML=""; sel.innerHTML="";
-persons.forEach(p=>{
-del.innerHTML+=`<option>${p.id}</option>`;
-sel.innerHTML+=`<option>${p.id}</option>`;
-});
+function updateFee(){
+ monthlyFee=document.getElementById("feeInput").value;
+ alert("تم تحديث الرسوم");
 }
 
-function generateSchedule(persons){
-let days=["الأحد","الاثنين","الثلاثاء","الأربعاء"];
-let html="<table><tr><th>اليوم</th><th>المسؤول</th></tr>";
-
-days.forEach(day=>{
-let available=persons.filter(p=>p.days.includes(day));
-if(available.length===0){
-html+=`<tr><td>${day}</td><td>—</td></tr>`;
-}else{
-let person=available[rotationIndex%available.length];
-html+=`<tr><td>${day}</td><td>${person.id}</td></tr>`;
-rotationIndex++;
-}
-});
-html+="</table>";
-document.getElementById("schedule").innerHTML=html;
+function payNow(){
+ alert("تم تسجيل الدفع");
 }
 
+function checkLate(){
+ const today=new Date().getDate();
+ if(today>15){
+   const bar=document.getElementById("warningBar");
+   bar.innerText="⚠ لديك مستحقات متأخرة";
+   bar.classList.add("show-warning");
+   setTimeout(()=>bar.classList.remove("show-warning"),7000);
+ }
+}
 </script>
+
 </body>
 </html>
