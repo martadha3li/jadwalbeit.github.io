@@ -3,7 +3,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebas
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging.js";
 
+// ====================
 // Firebase config
+// ====================
 const firebaseConfig = {
   apiKey: "AIzaSyBqBXmf2ui2_39MzoK5HLD6nRWYGO28oso",
   authDomain: "jadwal-beit.firebaseapp.com",
@@ -16,10 +18,28 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const messaging = getMessaging(app);
 
+// ====================
+// Variables
+// ====================
 let currentUser = null;
 let adminUsers = ["admin"];
 
+// ====================
+// Placeholder functions to prevent ReferenceError
+// ====================
+function loadSchedules() { console.log("loadSchedules called"); }
+function renderUsers() { console.log("renderUsers called"); }
+function renderFees() { console.log("renderFees called"); }
+function payNow() { console.log("payNow called"); }
+function addUser() { console.log("addUser called"); }
+function regenerate() { console.log("regenerate called"); }
+function toggleCooking() { console.log("toggleCooking called"); }
+function updateFee() { console.log("updateFee called"); }
+function viewStats() { console.log("viewStats called"); }
+
+// ====================
 // Splash Screen
+// ====================
 window.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     document.getElementById("splashScreen").style.display="none";
@@ -27,7 +47,9 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 500);
 });
 
+// ====================
 // Push notifications
+// ====================
 async function requestPermission() {
   try {
     const permission = await Notification.requestPermission();
@@ -45,23 +67,29 @@ onMessage(messaging,(payload)=>{
   setTimeout(()=>bar.classList.remove("show-warning"),7000);
 });
 
-// ============================
-// Login
-// ============================
+// ====================
+// Login Function
+// ====================
 async function login(){
-  const name=document.getElementById("loginName").value.trim();
-  const pass=document.getElementById("loginPass").value.trim();
-  if(!name||!pass){document.getElementById("loginError").innerText="الرجاء ملء جميع الحقول";return;}
+  const name = document.getElementById("loginName").value.trim();
+  const pass = document.getElementById("loginPass").value.trim();
+  const errorEl = document.getElementById("loginError");
+  errorEl.innerText = "";
 
-  const userDoc=await getDoc(doc(db,"users",name));
+  if(!name || !pass){
+    errorEl.innerText="الرجاء ملء جميع الحقول";
+    return;
+  }
+
+  const userDoc = await getDoc(doc(db,"users",name));
   if(userDoc.exists()){
-    const data=userDoc.data();
-    if(data.password===pass){
-      if(!data.active && !adminUsers.includes(name)){ 
-        document.getElementById("loginError").innerText="العضو غير مفعل بعد من الإدارة"; 
-        return; 
+    const data = userDoc.data();
+    if(data.password === pass){
+      if(!data.active && !adminUsers.includes(name)){
+        errorEl.innerText="العضو غير مفعل بعد من الإدارة";
+        return;
       }
-      currentUser={id:name,...data};
+      currentUser = {id:name, ...data};
       document.getElementById("loginPage").style.display="none";
       document.getElementById("app").style.display="block";
       if(adminUsers.includes(name)) document.getElementById("adminPanel").style.display="block";
@@ -69,21 +97,33 @@ async function login(){
       loadSchedules();
       renderUsers();
       renderFees();
-    } else { document.getElementById("loginError").innerText="كلمة المرور خاطئة"; }
-  } else { document.getElementById("loginError").innerText="المستخدم غير موجود"; }
+    } else {
+      errorEl.innerText="كلمة المرور خاطئة";
+    }
+  } else {
+    errorEl.innerText="المستخدم غير موجود";
+  }
 }
 
-// ============================
-// Register
-// ============================
+// ====================
+// Register Function
+// ====================
 async function register(){
-  const name=document.getElementById("newName").value.trim();
-  const pass=document.getElementById("newPass").value.trim();
-  const errorEl=document.getElementById("registerError");
-  if(!name||!pass){ errorEl.innerText="الرجاء ملء جميع الحقول"; return; }
+  const name = document.getElementById("newName").value.trim();
+  const pass = document.getElementById("newPass").value.trim();
+  const errorEl = document.getElementById("registerError");
+  errorEl.innerText = "";
 
-  const userDoc=await getDoc(doc(db,"users",name));
-  if(userDoc.exists()){ errorEl.innerText="هذا الاسم موجود مسبقاً"; return; }
+  if(!name || !pass){
+    errorEl.innerText="الرجاء ملء جميع الحقول";
+    return;
+  }
+
+  const userDoc = await getDoc(doc(db,"users",name));
+  if(userDoc.exists()){
+    errorEl.innerText="هذا الاسم موجود مسبقاً";
+    return;
+  }
 
   await setDoc(doc(db,"users",name),{name:name,password:pass,active:false,fcmToken:null});
   errorEl.style.color="lightgreen";
@@ -92,9 +132,9 @@ async function register(){
   document.getElementById("newPass").value="";
 }
 
-// ============================
+// ====================
 // Event Listeners
-// ============================
+// ====================
 document.getElementById("loginBtn").addEventListener("click", login);
 document.getElementById("registerBtn").addEventListener("click", register);
 document.getElementById("payNowBtn").addEventListener("click", payNow);
@@ -104,7 +144,17 @@ document.getElementById("toggleCookingBtn").addEventListener("click", toggleCook
 document.getElementById("updateFeeBtn").addEventListener("click", updateFee);
 document.getElementById("viewStatsBtn").addEventListener("click", viewStats);
 
-// ===================================
-// باقي الدوال: renderUsers, loadSchedules, renderFees, etc.
-// كما في النسخة السابقة
-// ===================================
+// ====================
+// Make all functions accessible globally
+// ====================
+window.login = login;
+window.register = register;
+window.loadSchedules = loadSchedules;
+window.renderUsers = renderUsers;
+window.renderFees = renderFees;
+window.payNow = payNow;
+window.addUser = addUser;
+window.regenerate = regenerate;
+window.toggleCooking = toggleCooking;
+window.updateFee = updateFee;
+window.viewStats = viewStats;
