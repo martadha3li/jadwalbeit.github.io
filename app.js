@@ -1,6 +1,6 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging.js";
 
 // ====================
@@ -25,17 +25,17 @@ let currentUser = null;
 let adminUsers = ["admin"];
 
 // ====================
-// Placeholder functions to prevent ReferenceError
+// Placeholder functions لمنع ReferenceError
 // ====================
-function loadSchedules() { console.log("loadSchedules called"); }
-function renderUsers() { console.log("renderUsers called"); }
-function renderFees() { console.log("renderFees called"); }
-function payNow() { console.log("payNow called"); }
-function addUser() { console.log("addUser called"); }
-function regenerate() { console.log("regenerate called"); }
-function toggleCooking() { console.log("toggleCooking called"); }
-function updateFee() { console.log("updateFee called"); }
-function viewStats() { console.log("viewStats called"); }
+function loadSchedules(){ console.log("loadSchedules called"); }
+function renderUsers(){ console.log("renderUsers called"); }
+function renderFees(){ console.log("renderFees called"); }
+function payNow(){ console.log("payNow called"); }
+function addUser(){ console.log("addUser called"); }
+function regenerate(){ console.log("regenerate called"); }
+function toggleCooking(){ console.log("toggleCooking called"); }
+function updateFee(){ console.log("updateFee called"); }
+function viewStats(){ console.log("viewStats called"); }
 
 // ====================
 // Splash Screen
@@ -133,10 +133,28 @@ async function register(){
 }
 
 // ====================
+// Logout Function
+// ====================
+function logout(){
+  currentUser = null;
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginPage").style.display="block";
+}
+
+// ====================
+// Modal Functionality
+// ====================
+const modal = document.getElementById("registerModal");
+document.getElementById("openRegisterModalBtn").addEventListener("click", ()=>{ modal.style.display="block"; });
+document.getElementById("closeModal").addEventListener("click", ()=>{ modal.style.display="none"; });
+window.addEventListener("click",(e)=>{ if(e.target==modal) modal.style.display="none"; });
+
+// ====================
 // Event Listeners
 // ====================
 document.getElementById("loginBtn").addEventListener("click", login);
 document.getElementById("registerBtn").addEventListener("click", register);
+document.getElementById("logoutBtn").addEventListener("click", logout);
 document.getElementById("payNowBtn").addEventListener("click", payNow);
 document.getElementById("addUserBtn").addEventListener("click", addUser);
 document.getElementById("regenerateBtn").addEventListener("click", regenerate);
@@ -145,10 +163,11 @@ document.getElementById("updateFeeBtn").addEventListener("click", updateFee);
 document.getElementById("viewStatsBtn").addEventListener("click", viewStats);
 
 // ====================
-// Make all functions accessible globally
+// Global Access
 // ====================
 window.login = login;
 window.register = register;
+window.logout = logout;
 window.loadSchedules = loadSchedules;
 window.renderUsers = renderUsers;
 window.renderFees = renderFees;
