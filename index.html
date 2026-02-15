@@ -9,40 +9,20 @@
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-/* Styles بسيطة للModal والشاشات الصغيرة */
-.modal {
-  display: none; position: fixed; z-index: 1000;
-  left: 0; top: 0; width: 100%; height: 100%;
-  overflow: auto; background-color: rgba(0,0,0,0.5);
-}
-.modal-content {
-  background-color: #fff; margin: 10% auto;
-  padding: 20px; border-radius: 10px;
-  width: 90%; max-width: 400px;
-}
-.close { float: right; font-size: 24px; cursor: pointer; }
-@media(max-width: 500px){
-  .card { margin:10px; padding:10px; }
-  .modal-content { width: 95%; margin-top:20%; }
-}
-button { cursor:pointer; }
-.user-icon{
-  display:inline-block;
-  width:40px;height:40px;
-  line-height:40px;
-  border-radius:50%;
-  text-align:center;
-  margin:5px;
-  background:#ddd;
-  font-weight:bold;
-}
-.warning{
-  display:none;
-  position:fixed; top:0; width:100%; background:#f87171; color:#fff;
-  text-align:center; padding:10px; z-index:999;
-}
-.show-warning{ display:block; animation: fadeout 7s; }
-@keyframes fadeout{ 0%{opacity:1} 90%{opacity:1} 100%{opacity:0} }
+body{font-family:'Cairo',sans-serif;margin:0;padding:0;background:#f1f5f9;}
+.card{background:#fff;margin:15px;padding:15px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+button{padding:8px 12px;border:none;border-radius:5px;cursor:pointer;}
+button.adminBtn{margin:5px;}
+button.active{background:#38bdf8;color:#fff;}
+button.inactive{background:#cbd5e1;color:#888;}
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.5);}
+.modal-content{background-color:#fff;margin:10% auto;padding:20px;border-radius:10px;width:90%;max-width:400px;}
+.close{float:right;font-size:24px;cursor:pointer;}
+.user-icon{display:inline-block;width:40px;height:40px;line-height:40px;border-radius:50%;text-align:center;margin:5px;background:#ddd;font-weight:bold;}
+#logoutBtn{background:#f87171;color:#fff;padding:10px 15px;border:none;border-radius:5px;float:left;margin-bottom:10px;}
+.warning{display:none;position:fixed;top:0;width:100%;background:#f87171;color:#fff;text-align:center;padding:10px;z-index:999;}
+.show-warning{display:block;animation:fadeout 7s;}
+@keyframes fadeout{0%{opacity:1}90%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -84,7 +64,14 @@ button { cursor:pointer; }
 <!-- Main App -->
 <div id="app" style="display:none">
 
-  <button id="logoutBtn" style="float:left; margin-bottom:10px;">تسجيل خروج</button>
+  <button id="logoutBtn">🔒 تسجيل خروج</button>
+
+  <!-- Options -->
+  <div class="card">
+    <h3>خيارات العرض</h3>
+    <button id="showWeekBtn">📅 عرض جدول الأسبوع كامل</button>
+    <button id="showTodayBtn">🗓 عرض مهام اليوم فقط</button>
+  </div>
 
   <!-- Tables -->
   <div class="card">
@@ -101,6 +88,14 @@ button { cursor:pointer; }
     <div id="usersIcons" class="icons"></div>
   </div>
 
+  <!-- Chat -->
+  <div class="card">
+    <h3>💬 دردشة الأعضاء</h3>
+    <div id="chatBox" style="height:200px; overflow-y:auto; border:1px solid #ccc; padding:5px;"></div>
+    <input type="text" id="chatInput" placeholder="اكتب رسالة...">
+    <button id="sendChatBtn">إرسال</button>
+  </div>
+
   <!-- Fees -->
   <div class="card">
     <h2>💰 الرسوم الشهرية</h2>
@@ -112,21 +107,21 @@ button { cursor:pointer; }
   <div id="adminPanel" class="card admin-panel" style="display:none">
     <h2>⚙ لوحة الإدارة</h2>
     <input type="number" id="feeInput" placeholder="تعديل مبلغ الرسوم">
-    <button id="updateFeeBtn">تحديث الرسوم</button>
+    <button id="updateFeeBtn" class="adminBtn active">تحديث الرسوم</button>
     <hr>
-    <button id="addUserBtn">إضافة عضو جديد</button>
-    <button id="regenerateBtn">إعادة توزيع الجداول</button>
-    <button id="toggleCookingBtn">إظهار/إخفاء جدول الطبخ</button>
-    <button id="viewStatsBtn">📊 الإحصائيات</button>
+    <h3>أعضاء البيت</h3>
+    <div id="adminMembers"></div>
+    <hr>
+    <button id="regenerateBtn" class="adminBtn active">إعادة توزيع الجداول</button>
+    <button id="toggleCookingBtn" class="adminBtn">إظهار/إخفاء جدول الطبخ</button>
+    <button id="viewStatsBtn" class="adminBtn">📊 الإحصائيات</button>
   </div>
 
 </div>
 
 <script type="module" src="app.js"></script>
 <script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("firebase-messaging-sw.js");
-}
+if("serviceWorker" in navigator){navigator.serviceWorker.register("firebase-messaging-sw.js");}
 </script>
 </body>
 </html>
